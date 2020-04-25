@@ -12,6 +12,7 @@ google-auth-httplib2 = "*"
 google-auth-oauthlib = "*"
 tenacity = "*"
 pytest = "*"
+pandas-gbq = "*"
 
 [requires]
 python_version = "3.7"
