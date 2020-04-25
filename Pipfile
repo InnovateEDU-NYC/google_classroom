@@ -13,6 +13,7 @@ google-auth-oauthlib = "*"
 tenacity = "*"
 pytest = "*"
 pandas-gbq = "*"
+pybigquery = "*"
 
 [requires]
 python_version = "3.7"
