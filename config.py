@@ -2,7 +2,7 @@
 
 import os
 import argparse
-from sqlsorcery import MSSQL, PostgreSQL, SQLite
+from sqlsorcery import Connection
 
 
 def get_args():
@@ -57,7 +57,14 @@ class Config(object):
     ACCOUNT_EMAIL = os.getenv("ACCOUNT_EMAIL")
     STUDENT_ORG_UNIT = os.getenv("STUDENT_ORG_UNIT")
     SCHOOL_YEAR_START = os.getenv("SCHOOL_YEAR_START")
-    DB_TYPE = os.getenv("DB_TYPE")
+    DB_DIALECT = os.getenv("DB_DIALECT")
+    DB_USER = os.getenv("DB_USER")
+    DB_PWD = os.getenv("DB_PWD")
+    DB_SERVER = os.getenv("DB_SERVER")
+    DB_PORT = os.getenv("DB_PORT")
+    DB = os.getenv("DB")
+    DB_SCHEMA = os.getenv("DB_SCHEMA")
+    DB_CREDS = os.getenv("DB_CREDS")
     DEBUG = args.debug
     DEBUGFILE = args.debugfile
     PULL_USAGE = os.getenv("PULL_USAGE") == "YES" or args.usage or args.all
@@ -92,7 +99,7 @@ class Config(object):
     USAGE_BATCH_SIZE = int(os.getenv("USAGE_BATCH_SIZE") or 1000)
     COURSES_BATCH_SIZE = int(os.getenv("COURSES_BATCH_SIZE") or 1000)
     TOPICS_BATCH_SIZE = int(os.getenv("TOPICS_BATCH_SIZE") or 1000)
-    COURSEWORK_BATCH_SIZE = int(os.getenv("COURSEWORK_BATCH_SIZE") or 120)
+    COURSEWORK_BATCH_SIZE = int(os.getenv("COURSEWORK_BATCH_SIZE") or 1000)
     STUDENTS_BATCH_SIZE = int(os.getenv("STUDENTS_BATCH_SIZE") or 1000)
     TEACHERS_BATCH_SIZE = int(os.getenv("TEACHERS_BATCH_SIZE") or 1000)
     GUARDIANS_BATCH_SIZE = int(os.getenv("GUARDIANS_BATCH_SIZE") or 1000)
@@ -105,7 +112,14 @@ class Config(object):
 
 
 class TestConfig(Config):
-    DB_TYPE = "sqlite"
+    DB_DIALECT = "sqlite"
+    DB_USER = None
+    DB_PWD = None
+    DB_SERVER = None
+    DB_PORT = None
+    DB = "tests.db"
+    DB_SCHEMA = None
+    DB_CREDS = None
     DEBUG = False
     DEBUGFILE = False
     PULL_USAGE = True
@@ -122,7 +136,6 @@ class TestConfig(Config):
     PULL_ANNOUNCEMENTS = True
     DISABLE_MAILER = True
     SCHOOL_YEAR_START = "2020-01-01"
-    SQLITE_FILE = "tests.db"
     STUDENT_ORG_UNIT = "Test Organization 2"
     ORG_UNIT_BATCH_SIZE = 1000
     USAGE_BATCH_SIZE = 1000
@@ -141,12 +154,14 @@ class TestConfig(Config):
 
 
 def db_generator(config):
-    db_type = config.DB_TYPE
-    if db_type == "mssql":
-        return MSSQL()
-    elif db_type == "postgres":
-        return PostgreSQL()
-    elif db_type == "sqlite":
-        return SQLite(path=config.SQLITE_FILE)
-    else:
-        raise Exception()
+    env_config = {
+        "dialect": config.DB_DIALECT,
+        "user": config.DB_USER,
+        "pwd": config.DB_PWD,
+        "server": config.DB_SERVER,
+        "port": config.DB_PORT,
+        "db": config.DB,
+        "schema": config.DB_SCHEMA,
+        "creds": config.DB_CREDS,
+    }
+    return Connection(**env_config)

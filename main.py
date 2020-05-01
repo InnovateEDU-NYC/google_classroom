@@ -41,6 +41,8 @@ def configure_logging(config):
     logging.getLogger("google_auth_oauthlib").setLevel(logging.ERROR)
     logging.getLogger("googleapiclient").setLevel(logging.ERROR)
     logging.getLogger("google").setLevel(logging.ERROR)
+    logging.getLogger("pybigquery").setLevel(logging.ERROR)
+    logging.getLogger("pandas_gbq").setLevel(logging.ERROR)
 
 
 def get_credentials(config):

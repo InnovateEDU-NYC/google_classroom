@@ -37,8 +37,8 @@ class TestEndToEnd:
         self.service = FakeService()
 
     def teardown(self):
-        if os.path.exists(self.config.SQLITE_FILE):
-            os.remove(self.config.SQLITE_FILE)
+        if os.path.exists(self.config.DB):
+            os.remove(self.config.DB)
 
     def test_get_org_units(self):
         self.generic_get_test(

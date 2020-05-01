@@ -8,8 +8,6 @@ import time
 from googleapiclient.http import HttpError
 import pandas as pd
 from tenacity import stop_after_attempt, wait_exponential, Retrying
-from sqlalchemy.schema import DropTable
-from sqlalchemy.exc import NoSuchTableError, InvalidRequestError
 from timer import elapsed
 
 
@@ -25,18 +23,13 @@ class EndPoint:
         self.filename = f"data/{self.classname().lower()}.json"
         self.columns = []
         self.date_columns = []
+        self.rename_columns = {}
         self.request_key = None
         self.table_name = f"GoogleClassroom_{self.classname()}"
 
     def return_all_data(self):
         """Returns all the data in the associated table"""
-        try:
-            return pd.read_sql_table(
-                self.table_name, con=self.sql.engine, schema=self.sql.schema
-            )
-        except InvalidRequestError as error:
-            logging.debug(error)
-            return None
+        return self.sql.read_table(self.table_name)
 
     def request_data(self, course_id=None, date=None, next_page_token=None):
         """
@@ -59,6 +52,23 @@ class EndPoint:
         """
         return dataframe
 
+    def _convert_dates(self, df):
+        """
+        Ensure specified columns are typed as dates when inserted into the database.
+        """
+        if self.date_columns:
+            date_types = {col: "datetime64[ns]" for col in self.date_columns}
+            df = df.astype(date_types)
+        return df
+
+    def _rename_columns(self, df):
+        """
+        Rename specified columns to prevent errors caused by invalid naming schemas.
+        """
+        if self.rename_columns:
+            df.rename(columns=self.rename_columns, inplace=True)
+        return df
+
     def _process_and_filter_records(self, records):
         """Processes incoming records and converts them into a cleaned dataframe"""
         logging.debug(f"{self.classname()}: processing {len(records)} records.")
@@ -67,9 +77,8 @@ class EndPoint:
         df = df.reindex(columns=self.columns)
         df = self.filter_data(df)
         df = df.astype("object")
-        if self.date_columns:
-            date_types = {col: "datetime64[ns]" for col in self.date_columns}
-            df = df.astype(date_types)
+        df = self._convert_dates(df)
+        df = self._rename_columns(df)
         return df
 
     def _write_to_db(self, df):
@@ -90,17 +99,6 @@ class EndPoint:
         with open(self.filename, mode) as file:
             file.seek(0)
             json.dump(json_data, file)
-
-    def _drop_table(self):
-        """
-        Deletes the connected table related to this class.
-        Drops rather than truncates to allow for easy schema changes without migrating.
-        """
-        try:
-            table = self.sql.table(self.table_name)
-            self.sql.engine.execute(DropTable(table))
-        except NoSuchTableError as error:
-            logging.debug(f"{error}: Attempted deletion, but no table exists.")
 
     def _generate_request_id(self, course_id, date, next_page_token, page):
         """
@@ -151,7 +149,7 @@ class EndPoint:
             overwite:   If True, drops and overwrites the existing database.
         """
         if overwrite:
-            self._drop_table()
+            self.sql.drop(self.table_name)
 
         if self.config.DEBUGFILE:
             self._delete_local_file()
@@ -429,6 +427,10 @@ class Teachers(EndPoint):
             "profile.name.fullName",
             "profile.emailAddress",
         ]
+        self.rename_columns = {
+            "profile.name.fullName": "fullName",
+            "profile.emailAddress": "emailAddress",
+        }
         self.request_key = "teachers"
         self.batch_size = config.TEACHERS_BATCH_SIZE
 
@@ -454,6 +456,10 @@ class Students(EndPoint):
             "profile.name.fullName",
             "profile.emailAddress",
         ]
+        self.rename_columns = {
+            "profile.name.fullName": "fullName",
+            "profile.emailAddress": "emailAddress",
+        }
         self.request_key = "students"
         self.batch_size = config.STUDENTS_BATCH_SIZE
 
