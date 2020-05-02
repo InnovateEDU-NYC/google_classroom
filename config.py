@@ -64,7 +64,7 @@ class Config(object):
     DB_PORT = os.getenv("DB_PORT")
     DB = os.getenv("DB")
     DB_SCHEMA = os.getenv("DB_SCHEMA")
-    DB_CREDS = os.getenv("DB_CREDS")
+    DB_CREDENTIALS = os.getenv("DB_CREDENTIALS")
     DEBUG = args.debug
     DEBUGFILE = args.debugfile
     PULL_USAGE = os.getenv("PULL_USAGE") == "YES" or args.usage or args.all
@@ -119,7 +119,7 @@ class TestConfig(Config):
     DB_PORT = None
     DB = "tests.db"
     DB_SCHEMA = None
-    DB_CREDS = None
+    DB_CREDENTIALS = None
     DEBUG = False
     DEBUGFILE = False
     PULL_USAGE = True
@@ -162,6 +162,6 @@ def db_generator(config):
         "port": config.DB_PORT,
         "db": config.DB,
         "schema": config.DB_SCHEMA,
-        "creds": config.DB_CREDS,
+        "creds": config.DB_CREDENTIALS,
     }
     return Connection(**env_config)
