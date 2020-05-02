@@ -31,7 +31,7 @@ STUDENT_ORG_UNIT=Name of the Google Admin organizational unit for students (opti
 SCHOOL_YEAR_START=YYYY-MM-DD
 
 # Database variables
-DB_DIALECT=The type of database you are using. Current options: mssql, postgres, sqlite
+DB_DIALECT=The type of database you are using. Current options: mssql, postgres, sqlite, and bigquery
 DB_SERVER=
 DB=
 DB_USER=
