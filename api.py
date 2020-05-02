@@ -61,14 +61,6 @@ class EndPoint:
             df = df.astype(date_types)
         return df
 
-    def _rename_columns(self, df):
-        """
-        Rename specified columns to prevent errors caused by invalid naming schemas.
-        """
-        if self.rename_columns:
-            df.rename(columns=self.rename_columns, inplace=True)
-        return df
-
     def _process_and_filter_records(self, records):
         """Processes incoming records and converts them into a cleaned dataframe"""
         logging.debug(f"{self.classname()}: processing {len(records)} records.")
@@ -78,7 +70,6 @@ class EndPoint:
         df = self.filter_data(df)
         df = df.astype("object")
         df = self._convert_dates(df)
-        df = self._rename_columns(df)
         return df
 
     def _write_to_db(self, df):
@@ -421,16 +412,7 @@ class Topics(EndPoint):
 class Teachers(EndPoint):
     def __init__(self, service, sql, config):
         super().__init__(service, sql, config)
-        self.columns = [
-            "courseId",
-            "userId",
-            "profile.name.fullName",
-            "profile.emailAddress",
-        ]
-        self.rename_columns = {
-            "profile.name.fullName": "fullName",
-            "profile.emailAddress": "emailAddress",
-        }
+        self.columns = ["courseId", "userId", "fullName", "emailAddress"]
         self.request_key = "teachers"
         self.batch_size = config.TEACHERS_BATCH_SIZE
 
@@ -446,20 +428,17 @@ class Teachers(EndPoint):
             )
         )
 
+    def preprocess_records(self, records):
+        for record in records:
+            record["fullName"] = record.get("profile").get("name").get("fullName")
+            record["emailAddress"] = record.get("profile").get("emailAddress")
+        return records
+
 
 class Students(EndPoint):
     def __init__(self, service, sql, config):
         super().__init__(service, sql, config)
-        self.columns = [
-            "courseId",
-            "userId",
-            "profile.name.fullName",
-            "profile.emailAddress",
-        ]
-        self.rename_columns = {
-            "profile.name.fullName": "fullName",
-            "profile.emailAddress": "emailAddress",
-        }
+        self.columns = ["courseId", "userId", "fullName", "emailAddress"]
         self.request_key = "students"
         self.batch_size = config.STUDENTS_BATCH_SIZE
 
@@ -474,6 +453,12 @@ class Students(EndPoint):
                 pageSize=self.config.PAGE_SIZE,
             )
         )
+
+    def preprocess_records(self, records):
+        for record in records:
+            record["fullName"] = record.get("profile").get("name").get("fullName")
+            record["emailAddress"] = record.get("profile").get("emailAddress")
+        return records
 
 
 class CourseWork(EndPoint):
