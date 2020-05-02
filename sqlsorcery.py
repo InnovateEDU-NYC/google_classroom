@@ -35,29 +35,47 @@ class Connection:
         self.engine = self._get_engine()
 
     def _cstr(self):
+        """
+        Constructs SQLAlchemy connection string.
+        """
         return URL(self.dialect, **self.options)
 
-    def _bigquery_options(self):
+    def _add_bigquery_options(self):
+        """
+        Adds BigQuery specific connection options for creating engine.
+        """
         if self.dialect == "bigquery":
-            self._get_creds()
+            self._get_bigquery_creds()
             self.helpers["credentials_path"] = self.creds
 
-    def _get_creds(self):
+    def _get_bigquery_creds(self):
+        """
+        Sets bigquery specific authentication variables.
+        """
         credentials = service_account.Credentials.from_service_account_file(self.creds)
         pandas_gbq.context.credentials = credentials
         pandas_gbq.context.project = self.db
 
     def _get_engine(self):
-        self._bigquery_options()
+        """
+        Sets database engine for connections.
+        """
+        self._add_bigquery_options()
         return create_engine(self._cstr(), **self.helpers)
 
     def query(self, sql_query, params=None):
+        """
+        Returns results of SQL query as pandas dataframe.
+        """
         if self.dialect == "bigquery":
             return pandas_gbq.read_gbq(sql_query, progress_bar_type=None)
         else:
             return pd.read_sql_query(sql_query, con=self.engine, params=params)
 
     def insert_into(self, table, df, if_exists="append", chunksize=None, dtype=None):
+        """
+        Inserts pandas dataframe into database table.
+        """
         if self.dialect == "bigquery":
             pandas_gbq.to_gbq(
                 dataframe=df,
@@ -78,6 +96,9 @@ class Connection:
             )
 
     def table(self, tablename):
+        """
+        Returns SQLAlchemy Table object.
+        """
         return Table(
             tablename,
             MetaData(),
@@ -87,6 +108,9 @@ class Connection:
         )
 
     def drop(self, tablename):
+        """
+        Drops database table if it exists.
+        """
         try:
             table = self.table(tablename)
             self.engine.execute(DropTable(table))
@@ -94,6 +118,9 @@ class Connection:
             pass
 
     def read_table(self, tablename):
+        """
+        Returns all data from a specified database table. 
+        """
         if self.dialect == "bigquery":
             return self.query(f"SELECT * FROM {self.schema}.{tablename}")
         else:
