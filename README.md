@@ -1,5 +1,7 @@
 # googleclassroom
 
+Data pipeline for Google Classroom API to BigQuery
+
 ## Dependencies:
 
 - Python3.7
@@ -13,7 +15,7 @@
 1. Clone this repo
 
 ```
-git clone https://github.com/kipp-bayarea/google_classroom.git
+git clone https://github.com/InnovateEDU-NYC/google_classroom.git
 ```
 
 2. Install dependencies
@@ -25,16 +27,17 @@ git clone https://github.com/kipp-bayarea/google_classroom.git
 ```
 # Basic Configuration Info
 ACCOUNT_EMAIL=Email of admin account that will be used to pull data.
-STUDENT_ORG_UNIT=Name of the Google Admin organizational unit for students (optional — filters student reports to that organization)
+STUDENT_ORG_UNIT=Name of the Google Admin organizational unit for students (optional — filters student usage reports to that organization)
 SCHOOL_YEAR_START=YYYY-MM-DD
 
 # Database variables
-DB_TYPE=The type of database you are using. Current options: mssql, postgres, sqlite
+DB_DIALECT=The type of database you are using. Current options: mssql, postgres, sqlite
 DB_SERVER=
 DB=
 DB_USER=
 DB_PWD=
 DB_SCHEMA=
+DB_CREDS=name of json file with service account credentials
 
 # (Optional) Data Pulls To Enable. Set to "YES" to include that pull.
 # These can be left out in favor of command line arguments.
