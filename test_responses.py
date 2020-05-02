@@ -274,8 +274,8 @@ STUDENT_SOLUTION = pd.DataFrame(
     {
         "courseId": ["123", "123"],
         "userId": ["1", "2"],
-        "profile.name.fullName": ["Test User", "Another User"],
-        "profile.emailAddress": ["test_user@email.com", "another_user@email.com"],
+        "fullName": ["Test User", "Another User"],
+        "emailAddress": ["test_user@email.com", "another_user@email.com"],
     }
 )
 STUDENT_RESPONSE = {
@@ -314,8 +314,8 @@ TEACHER_SOLUTION = pd.DataFrame(
     {
         "courseId": ["111", "333", "444"],
         "userId": ["555", "321", "555"],
-        "profile.name.fullName": ["Boss Lady", "Mr. Teacher", "Mrs. Teacher"],
-        "profile.emailAddress": [
+        "fullName": ["Boss Lady", "Mr. Teacher", "Mrs. Teacher"],
+        "emailAddress": [
             "boss_lady@email.com",
             "mr_teacher@email.com",
             "mrs_teacher@email.com",
