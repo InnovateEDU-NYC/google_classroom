@@ -140,7 +140,7 @@ class EndPoint:
             overwite:   If True, drops and overwrites the existing database.
         """
         if overwrite:
-            self.sql.drop(self.table_name)
+            self.sql.drop_table(self.table_name)
 
         if self.config.DEBUGFILE:
             self._delete_local_file()

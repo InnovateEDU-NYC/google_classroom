@@ -107,7 +107,7 @@ class Connection:
             schema=self.schema,
         )
 
-    def drop(self, tablename):
+    def drop_table(self, tablename):
         """
         Drops database table if it exists.
         """
