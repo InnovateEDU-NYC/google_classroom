@@ -265,9 +265,7 @@ class StudentUsage(EndPoint):
     def get_last_date(self):
         """Gets the last available date of data in the database."""
         try:
-            usage = pd.read_sql_table(
-                self.table_name, con=self.sql.engine, schema=self.sql.schema
-            )
+            usage = self.sql.read_table(self.table_name)
             return usage.AsOfDate.max() if usage.AsOfDate.count() > 0 else None
         except:
             return None
