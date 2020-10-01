@@ -11,6 +11,7 @@ google-auth-httplib2 = "*"
 google-auth-oauthlib = "*"
 tenacity = "*"
 pytest = "*"
+google-cloud-bigquery-storage = "*"
 pandas-gbq = "0.13.2"
 pybigquery = "*"
 
